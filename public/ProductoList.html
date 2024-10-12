@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Productos</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button.delete {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/productos">Lista de Productos</a></li>
+            <li><a href="/crearProducto">Agregar Producto</a></li>
+            <li><a href="/movimientoProducto">Registrar Movimiento</a></li>
+        </ul>
+    </nav>
+    <h1>Lista de Productos</h1>
+    <table id="productosTable">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Categoría</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="listaProductos"></tbody>
+    </table>
+
+    <!-- Botón para exportar la tabla a PDF -->
+    <button id="exportarPDF">Exportar a PDF</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Función para cargar los productos
+        function cargarProductos() {
+            fetch('/api/productos')
+                .then(response => response.json())
+                .then(productos => {
+                    const listaProductos = document.getElementById('listaProductos');
+                    listaProductos.innerHTML = '';  // Limpiar lista
+                    productos.forEach(producto => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${producto.nombre}</td>
+                            <td>${producto.descripcion}</td>
+                            <td>${producto.precio}</td>
+                            <td>${producto.stock}</td>
+                            <td>${producto.categoria}</td>
+                            <td>
+                                <button onclick="cambiarStock('${producto._id}', '${producto.nombre}')">Actualizar Stock</button>
+                                <button class="delete" onclick="borrarProducto('${producto._id}')">Borrar</button>
+                            </td>
+                        `;
+                        listaProductos.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error al cargar productos:', error));
+        }
+
+        // Función para cambiar el stock con un prompt
+        function cambiarStock(productoId, productoNombre) {
+            const nuevoStock = prompt(`Ingrese la nueva cantidad de stock para el producto: ${productoNombre}`);
+            if (nuevoStock !== null) {
+                fetch(`/api/productos/${productoId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ stock: parseInt(nuevoStock, 10) }) // Asegurar que es un número
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Stock actualizado correctamente');
+                    cargarProductos(); // Refresca la lista de productos
+                })
+                .catch(error => console.error('Error al actualizar stock:', error));
+            }
+        }
+
+        // Función para borrar un producto
+        function borrarProducto(productoId) {
+            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                fetch(`/api/productos/${productoId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Producto borrado correctamente');
+                    cargarProductos(); // Refresca la lista de productos
+                })
+                .catch(error => console.error('Error al borrar producto:', error));
+            }
+        }
+
+        // Función para exportar la tabla de productos a PDF
+        document.getElementById('exportarPDF').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            let table = document.getElementById('productosTable');
+            let rows = table.querySelectorAll('tr');
+            let yPosition = 10;
+
+            rows.forEach((row, index) => {
+                let cols = row.querySelectorAll('td, th');
+                let xPosition = 10;
+
+                cols.forEach(col => {
+                    doc.text(col.textContent, xPosition, yPosition);
+                    xPosition += 40; // Ajustar espacio entre columnas
+                });
+
+                yPosition += 10; // Ajustar espacio entre filas
+            });
+
+            doc.save('lista_productos.pdf');
+        });
+
+        document.addEventListener('DOMContentLoaded', cargarProductos);
+    </script>
+
+</body>
+</html>

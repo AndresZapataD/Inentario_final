@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        a {
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenido al Sistema de Inventario</h1>
+        <p>Seleccione una opción para continuar:</p>
+        
+        <div>
+            <button class="button">
+                <a href="/productos">Ver lista de productos</a>
+            </button>
+        </div>
+        
+        <div>
+            <button class="button">
+                <a href="/crearProducto">Agregar nuevo producto</a>
+            </button>
+        </div>
+
+        <div>
+            <button class="button">
+                <a href="/movimientoProducto">Registrar movimiento (Ingreso/Egreso)</a>
+            </button>
+        </div>
+    </div>
+</body>
+</html>
